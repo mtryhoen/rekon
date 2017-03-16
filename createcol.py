@@ -45,12 +45,6 @@ else:
 
 file = "C:\\Users\\mtryhoen\\Pictures\\test_image.png"
 
-#########Facebook Graph
-FACEBOOK_APP_ID     = '1217401738373219'
-FACEBOOK_APP_SECRET = '0d9c39848700d901fac2022031373d0f'
-
-
-
 def get_fb_token(app_id, app_secret):
     payload = {'grant_type': 'client_credentials', 'client_id': app_id, 'client_secret': app_secret}
     file = requests.post('https://graph.facebook.com/oauth/access_token?', params = payload)
@@ -136,19 +130,11 @@ for memberid, membername in MEMID.items():
         #print(response)
         confidence = response[0]['Confidence']
 
-        #if member == "10154479345032683":
         print("Confidence for " + memberid + " is " + str(confidence) )
-        #print(len(response))
-        #break
 
     except:
         print("No face detected")
-        '''
-        if member == "10154479345032683":
-            print("Confidence for Marie " + member + " is " + str(confidence))
-            print(len(response))
-            break
-        '''
+
     if confidence > 75:
         response = client.index_faces(
             CollectionId='facedb',
@@ -158,17 +144,6 @@ for memberid, membername in MEMID.items():
             ExternalImageId=membername
         )
 
-#params = urllib.urlencode({"access_token": ACCESS_TOKEN})
-#url = "{host}{path}?{params}".format(host=host, path=path, params=params)
-
-
-
-# display the result
-#pprint.pprint(me)
-
-#response = client.delete_collection(
-#    CollectionId='facedb'
-#)
 collections = client.list_collections().get('CollectionIds',[])
 if 'facedb' not in collections:
     print("Creating Collection facedb")
@@ -180,24 +155,6 @@ else:
     exit(1)
 
 '''
-with open('C:\\Users\\mtryhoen\\Pictures\\test_image_init.png', 'rb') as source_image:
-    source_bytes = source_image.read()
-    response = client.index_faces(
-        CollectionId='facedb',
-        Image={
-            'Bytes': source_bytes
-        },
-        ExternalImageId='Max'
-    )
-with open('C:\\Users\\mtryhoen\\Pictures\\darts.png', 'rb') as source_image:
-    source_bytes = source_image.read()
-    response = client.index_faces(
-        CollectionId='facedb',
-        Image={
-            'Bytes': source_bytes
-        },
-        ExternalImageId='Darts'
-    )
 with open('C:\\Users\\mtryhoen\\Pictures\\marie.jpg', 'rb') as source_image:
     source_bytes = source_image.read()
     response = client.index_faces(
