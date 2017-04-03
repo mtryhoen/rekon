@@ -5,18 +5,17 @@ import urllib.parse as urllib
 import io
 import requests
 import unicodedata
-import dynamo
 import savepic
 
 GROUP = 'lecoursiermontois7000mons'
-
+TABLENAME = 's3pic'
 ACCOUNT = 'perso'
 region = 'eu-west-1'
 
 dyn=boto3.client('dynamodb')
 tables = dyn.list_tables().get('TableNames',[])
-if 's3pic' not in tables:
-    tablename=dynamo.create()
+if TABLENAME not in tables:
+    tablename=savepic.createdb(dyn)
     print(tablename)
 
 client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
@@ -133,7 +132,10 @@ for memberid, membername in MEMID.items():
         print("No face detected")
 
     if confidence > 75:
-        savepic.dynsave(memberid, membername, memberlastname, target_bytes)
+        dynamo = boto3.client('dynamodb')
+        BUCKET = "rekon-fbpics"
+        savepic.s3save(memberid, target_bytes, BUCKET)
+        savepic.addpicdb(dynamo, TABLENAME, memberid, membername, memberlastname)
         response = client.index_faces(
             CollectionId='facedb',
             Image={
