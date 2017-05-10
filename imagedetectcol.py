@@ -1,7 +1,6 @@
 import cv2
 import sys
 import boto3
-import numpy as np
 
 ACCOUNT = 'perso'
 region = 'eu-west-1'
@@ -31,19 +30,16 @@ def getinfo(target_bytes):
         gender=faceinfo[0]['Gender']['Value']
         glasses=faceinfo[0]['Eyeglasses']['Value']
         for emotion in faceinfo[0]['Emotions']:
-            print(str(emotion))
-            if emotion['Confidence'] > 80:
+            if emotion['Confidence'] > 50:
                 goodemotion=emotion['Type']
-                print(goodemotion)
+                break
             else:
-                print(str(emotion['Confidence']))
+                goodemotion="Pas d'emotion"
 
         if glasses:
             glasses="lunettes"
         else:
             glasses="pas de lunettes"
-
-        print(gender + ", " +glasses + ", " + goodemotion)
 
         if gender == "Male":
             gender="Monsieur"
@@ -56,7 +52,7 @@ def getinfo(target_bytes):
         #else:
         #    glasses="Pas de lunettes"
 
-        return ("Bonjour " + gender)
+        return ("Bonjour " + gender + ", " + glasses + ", " + goodemotion)
 
     except:
         return "Problem"
