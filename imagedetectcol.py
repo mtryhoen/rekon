@@ -1,6 +1,7 @@
 import cv2
 import sys
 import boto3
+import numpy as np
 
 ACCOUNT = 'perso'
 region = 'eu-west-1'
@@ -16,6 +17,70 @@ video_capture = cv2.VideoCapture(0)
 #Number of frames to throw away while the camera adjusts to light levels
 ramp_frames = 5
 file = "C:\\Users\\mtryhoen\\Pictures\\test_image.png"
+
+def getinfo(target_bytes):
+    try:
+        faceinfo = client.detect_faces(
+            Image={
+                'Bytes': target_bytes,
+            },
+            Attributes=[
+                'ALL',
+            ]
+        ).get('FaceDetails', [])
+        gender=faceinfo[0]['Gender']['Value']
+        glasses=faceinfo[0]['Eyeglasses']['Value']
+        for emotion in faceinfo[0]['Emotions']:
+            print(str(emotion))
+            if emotion['Confidence'] > 80:
+                goodemotion=emotion['Type']
+                print(goodemotion)
+            else:
+                print(str(emotion['Confidence']))
+
+        if glasses:
+            glasses="lunettes"
+        else:
+            glasses="pas de lunettes"
+
+        print(gender + ", " +glasses + ", " + goodemotion)
+
+        if gender == "Male":
+            gender="Monsieur"
+        else:
+            gender="Madame"
+
+
+        #if glasses == "True":
+        #    glasses="Venez profiter de nos promotions sur les lunettes"
+        #else:
+        #    glasses="Pas de lunettes"
+
+        return ("Bonjour " + gender)
+
+    except:
+        return "Problem"
+
+def rekon(target_bytes):
+    try:
+        collection_match = client.search_faces_by_image(
+            CollectionId='facedb',
+            Image={
+                'Bytes': target_bytes
+            },
+            FaceMatchThreshold=SIMILARITY_THRESHOLD
+        ).get('FaceMatches', [])
+    except:
+        return("Y a personne")
+
+    try:
+        if collection_match[0]['Similarity'] > 75:
+            ImageId = collection_match[0]['Face']['ExternalImageId']
+            return("Salut " + ImageId + " !")
+        else:
+            return("Pas reconnu...")
+    except:
+        return('Pas reconnu !')
 
 while True:
     for i in range(ramp_frames):
@@ -38,43 +103,16 @@ while True:
         print('Y a personne')
     elif faces.size:
         cv2.imwrite(file, frame)
-        #print (faces)
-        #input("Press Enter to continue...")
+
         with open('C:\\Users\\mtryhoen\\Pictures\\test_image.png', 'rb') as target_image:
-        #with open('C:\\Users\\mtryhoen\\Pictures\\marie.jpg', 'rb') as target_image:
             target_bytes = target_image.read()
-        try:
-            collection_match = client.search_faces_by_image(
-                CollectionId='facedb',
-                Image={
-                    'Bytes': target_bytes
-                },
-                FaceMatchThreshold=SIMILARITY_THRESHOLD
-            ).get('FaceMatches',[])
-        except:
-            print ("Y a personne")
+        #target_bytes = frame.tobytes()
 
-        #print(type(collection_match[0]))
+        #name=rekon(target_bytes)
+        #print(name)
 
-        try:
-            if collection_match[0]['Similarity'] > 75:
-                ImageId = collection_match[0]['Face']['ExternalImageId']
-                print("Salut " + ImageId + " !")
-            else:
-                print("Pas reconnu...")
-        except:
-            print('Pas reconnu !')
-    '''
-    # Draw a rectangle around the faces
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-    # Display the resulting frame
-    cv2.imshow('Video', frame)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    '''
+        gender=getinfo(target_bytes)
+        print(gender)
 
 # When everything is done, release the capture
 video_capture.release()
