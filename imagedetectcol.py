@@ -12,6 +12,7 @@ cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)
+# video_capture = cv2.VideoCapture(http://192.168.0.50:423/videostream.cgiuser=admin&pwd=admin&resolution=32&rate=10.mpeg")
 
 #Number of frames to throw away while the camera adjusts to light levels
 ramp_frames = 5
