@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a928ce71-65aa-4e25-b566-0d616410d144" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/createcol.py" afterPath="$PROJECT_DIR$/createcol.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/imagedetectcol.py" afterPath="$PROJECT_DIR$/imagedetectcol.py" />
     </list>
     <ignored path="Rekon.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -26,8 +25,8 @@
       <file leaf-file-name="createcol.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/createcol.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="113">
-              <caret line="163" column="35" selection-start-line="163" selection-start-column="35" selection-end-line="163" selection-end-column="35" />
+            <state relative-caret-position="177">
+              <caret line="139" column="0" selection-start-line="139" selection-start-column="0" selection-end-line="139" selection-end-column="0" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
               </folding>
@@ -38,8 +37,8 @@
       <file leaf-file-name="imagedetectcol.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/imagedetectcol.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="13" selection-end-column="45" />
+            <state relative-caret-position="318">
+              <caret line="112" column="46" selection-start-line="110" selection-start-column="8" selection-end-line="112" selection-end-column="46" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -312,8 +311,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/imagedetectcol.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="13" selection-end-column="45" />
+        <state relative-caret-position="318">
+          <caret line="112" column="46" selection-start-line="110" selection-start-column="8" selection-end-line="112" selection-end-column="46" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
@@ -322,8 +321,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/createcol.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="113">
-          <caret line="163" column="35" selection-start-line="163" selection-start-column="35" selection-end-line="163" selection-end-column="35" />
+        <state relative-caret-position="177">
+          <caret line="139" column="0" selection-start-line="139" selection-start-column="0" selection-end-line="139" selection-end-column="0" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>

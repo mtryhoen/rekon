@@ -136,6 +136,11 @@ def createFromFB():
 
 
 def createFromS3(COLLECTION, ACCOUNT, region, bucket):
+    client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('s3')
+
+    with open('C:\\Users\\mtryhoen\\Pictures\\test_image.png', 'rb') as target_image:
+        target_bytes = target_image.read()
+
     rekon = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
     collections = rekon.list_collections().get('CollectionIds', [])
     if COLLECTION not in collections:
@@ -152,7 +157,6 @@ def createFromS3(COLLECTION, ACCOUNT, region, bucket):
             CollectionId=COLLECTION
         )
 
-    client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('s3')
     istrunk=1
     marker=''
     while istrunk:
@@ -168,14 +172,15 @@ def createFromS3(COLLECTION, ACCOUNT, region, bucket):
             response = rekon.index_faces(
                 CollectionId=COLLECTION,
                 Image={
-                    'S3Object': {
-                        'Bucket': bucket,
-                        'Name': imgkey
-                    }
+                    'Bytes': target_bytes
+                    #'S3Object': {
+                    #    'Bucket': bucket,
+                    #    'Name': imgkey
+                    #}
                 },
                 ExternalImageId=imgname
             )
-
+            exit(0)
         istrunk = objects.get('IsTruncated')
 
 
