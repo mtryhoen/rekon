@@ -1,18 +1,19 @@
 import cv2
 import sys
 import boto3
+import msvcrt
 
 ACCOUNT = 'perso'
 region = 'eu-west-1'
 client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
 
-SIMILARITY_THRESHOLD = 20.0
+SIMILARITY_THRESHOLD = 70.0
+COLLECTION = 'famille'
 
 cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)
-# video_capture = cv2.VideoCapture(http://192.168.0.50:423/videostream.cgiuser=admin&pwd=admin&resolution=32&rate=10.mpeg")
 
 #Number of frames to throw away while the camera adjusts to light levels
 ramp_frames = 5
@@ -29,6 +30,7 @@ def getinfo(target_bytes):
             ]
         ).get('FaceDetails', [])
         gender=faceinfo[0]['Gender']['Value']
+        '''
         glasses=faceinfo[0]['Eyeglasses']['Value']
         for emotion in faceinfo[0]['Emotions']:
             if emotion['Confidence'] > 50:
@@ -41,6 +43,7 @@ def getinfo(target_bytes):
             glasses="lunettes"
         else:
             glasses="pas de lunettes"
+        '''
 
         if gender == "Male":
             gender="Monsieur"
@@ -53,15 +56,16 @@ def getinfo(target_bytes):
         #else:
         #    glasses="Pas de lunettes"
 
-        return ("Bonjour " + gender + ", " + glasses + ", " + goodemotion)
+        # return ("Bonjour " + gender + ", " + glasses + ", " + goodemotion)
+        return ("Bonjour " + gender)
 
     except:
         return "Problem"
 
-def rekon(target_bytes):
+def rekon(COLLECTION, target_bytes):
     try:
         collection_match = client.search_faces_by_image(
-            CollectionId='facedb',
+            CollectionId= COLLECTION,
             Image={
                 'Bytes': target_bytes
             },
@@ -80,6 +84,9 @@ def rekon(target_bytes):
         return('Pas reconnu !')
 
 while True:
+    if msvcrt.kbhit():
+        if ord(msvcrt.getch()) == 32:
+            break
     for i in range(ramp_frames):
         rettmp, frametmp = video_capture.read()
     # Capture frame-by-frame
@@ -102,14 +109,15 @@ while True:
         cv2.imwrite(file, frame)
 
         with open('C:\\Users\\mtryhoen\\Pictures\\test_image.png', 'rb') as target_image:
+        #with open('C:\\Users\\mtryhoen\\Pictures\\famille\\alice.jpg', 'rb') as target_image:
             target_bytes = target_image.read()
         #target_bytes = frame.tobytes()
 
-        #name=rekon(target_bytes)
-        #print(name)
+        name=rekon(COLLECTION, target_bytes)
+        print(name)
 
-        gender=getinfo(target_bytes)
-        print(gender)
+        #gender=getinfo(target_bytes)
+        #print(gender)
 
 # When everything is done, release the capture
 video_capture.release()
