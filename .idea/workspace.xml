@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a928ce71-65aa-4e25-b566-0d616410d144" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/polly.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/createcol.py" afterPath="$PROJECT_DIR$/createcol.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/imagedetectcol.py" afterPath="$PROJECT_DIR$/imagedetectcol.py" />
-    </list>
+    <list default="true" id="a928ce71-65aa-4e25-b566-0d616410d144" name="Default" comment="" />
     <ignored path="Rekon.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
