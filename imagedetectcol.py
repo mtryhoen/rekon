@@ -2,6 +2,7 @@ import cv2
 import sys
 import boto3
 import msvcrt
+import polly
 
 ACCOUNT = 'perso'
 region = 'eu-west-1'
@@ -57,7 +58,7 @@ def getinfo(target_bytes):
         #    glasses="Pas de lunettes"
 
         # return ("Bonjour " + gender + ", " + glasses + ", " + goodemotion)
-        return ("Bonjour " + gender)
+        return (gender)
 
     except:
         return "Problem"
@@ -72,17 +73,18 @@ def rekon(COLLECTION, target_bytes):
             FaceMatchThreshold=SIMILARITY_THRESHOLD
         ).get('FaceMatches', [])
     except:
-        return("Y a personne")
+        return("Pas reconnu.")
 
     try:
         if collection_match[0]['Similarity'] > 75:
             ImageId = collection_match[0]['Face']['ExternalImageId']
-            return("Salut " + ImageId + " !")
+            return (ImageId)
         else:
             return("Pas reconnu...")
     except:
         return('Pas reconnu !')
 
+imageid=0
 while True:
     if msvcrt.kbhit():
         if ord(msvcrt.getch()) == 32:
@@ -113,10 +115,21 @@ while True:
             target_bytes = target_image.read()
         #target_bytes = frame.tobytes()
 
-        name=rekon(COLLECTION, target_bytes)
-        print(name)
+        id=rekon(COLLECTION, target_bytes)
+        if imageid == id:
+            print("Deja vu!")
+            continue
+        elif "Pas reconnu" in id:
+            continue
+        else:
+            imageid=id
+            print(id)
 
-        #gender=getinfo(target_bytes)
+        gender=getinfo(target_bytes)
+        text="Bonjour " + gender + ". Vous vous appelez " + imageid + ". N'est-ce pas?"
+        if id == "nico":
+            text=text + " Est-ce que la collection SALLSKAP vous plait?"
+        polly.talk(text)
         #print(gender)
 
 # When everything is done, release the capture

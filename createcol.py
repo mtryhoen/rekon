@@ -10,15 +10,18 @@ from random import randint
 import cv2
 import sys
 
-GROUP = 'lecoursiermontois7000mons'
-COLLECTION = 'facedb'
+#GROUP = 'lecoursiermontois7000mons'
+GROUP = 'Fleurs a Couper'
+#GROUP = 'Ducati DESMO Fans !!!!!'
+COLLECTION = 'famille'
+#COLLECTION = 'facedb'
 DIR = 'C:\\Users\\mtryhoen\\Pictures\\famille'
 file = "C:/Users/mtryhoen/Pictures/test_image.png"
 cascPath = sys.argv[1]
 ACCOUNT = 'perso'
 region = 'eu-west-1'
-bucket="rekonfbpics"
-ACCESS_TOKEN = 'EAACEdEose0cBAC3eraz8V3NauM4U9zkMZCR2NNf2FydRyGPCGtvhawQmmnQ585XjpHJ9OSZAmtRS3YXrrMdN3EsOuPAnrKpyYad8AhH6CW1H64tWAwRsdnBDImeBjRw2LmohqBYlUagtPi0u0QFZAnHZCji4OrndcpckbvwqolWysdvvf3iV'
+bucket="rekon-fbpics"
+ACCESS_TOKEN = 'EAACEdEose0cBAHCCXVLT5TAa6gKYsv9TuDMZBiZAWXT9WiRvKZCi7YZAZCmoAhMpkRSD4z4t64Vla9ZANWHibxhYZCn7f0ZCOMlIxS8QsziqzM98ZBoDxBAtEpBCRoFlEbIyQfkocHr3n3acdcgsUU4hE58tOR0KRE8gCahYVw5egRebjoqVyZAFHp'
 
 
 def createFromDir(COLLECTION, DIR):
@@ -93,8 +96,8 @@ def createFromFB():
         except:
             url = ""
 
-    print(len(MEMID) + "members in the group")
-
+    print(len(MEMID))
+    exit(0)
     # Get profile pictures
     for memberid, membername in MEMID.items():
         membername = membername.split()[0]
@@ -138,8 +141,8 @@ def createFromFB():
 def createFromS3(COLLECTION, ACCOUNT, region, bucket):
     client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('s3')
 
-    with open('C:\\Users\\mtryhoen\\Pictures\\test_image.png', 'rb') as target_image:
-        target_bytes = target_image.read()
+    #with open('C:\\Users\\mtryhoen\\Pictures\\test_image.png', 'rb') as target_image:
+    #    target_bytes = target_image.read()
 
     rekon = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
     collections = rekon.list_collections().get('CollectionIds', [])
@@ -165,22 +168,19 @@ def createFromS3(COLLECTION, ACCOUNT, region, bucket):
         marker = objects.get('NextMarker')
 
         for photo in photos:
-            imgname = photo['Key']#.split("/")[1].split("_")[1].replace("-", "")
+            imgname = photo['Key'].split("/")[1].split("_")[1].replace("-", "")
             imgkey = photo['Key']
-            print(imgkey)
-            #exit(0)
             response = rekon.index_faces(
                 CollectionId=COLLECTION,
                 Image={
-                    'Bytes': target_bytes
-                    #'S3Object': {
-                    #    'Bucket': bucket,
-                    #    'Name': imgkey
-                    #}
+                    #'Bytes': target_bytes
+                    'S3Object': {
+                        'Bucket': bucket,
+                        'Name': imgkey
+                    }
                 },
                 ExternalImageId=imgname
             )
-            exit(0)
         istrunk = objects.get('IsTruncated')
 
 
@@ -236,7 +236,6 @@ def Fb2S3(GROUP, ACCESS_TOKEN, file, cascPath, bucket):
         membername = unicodedata.normalize('NFKD', membername).encode('ASCII', 'ignore').decode('UTF-8')
         if len(membername) < 1:
             continue
-        print (membername)
         path = "/" + memberid + "/picture"
         params = urllib.urlencode({"type": "large", "access_token": ACCESS_TOKEN})
         url = "{host}{path}?{params}".format(host=host, path=path, params=params)
@@ -259,14 +258,14 @@ def Fb2S3(GROUP, ACCESS_TOKEN, file, cascPath, bucket):
         )
 
         if type(faces) is tuple:
-            print('Y a personne')
+            continue
         elif faces.size:
             print('Saving to S3...')
             s3.put_object(
                 Body=target_bytes,
                 Bucket=bucket,
-                #Key=("/" + memberid + "_" + membername.lower() + "/1.jpg"),
-                Key=memberid,
+                Key=(memberid + "_" + membername.lower() + "/1.jpg"),
+                #Key=memberid,
                 StorageClass='REDUCED_REDUNDANCY',
                 Metadata={
                     'Content-Type':'image/jpeg'
@@ -275,6 +274,6 @@ def Fb2S3(GROUP, ACCESS_TOKEN, file, cascPath, bucket):
 
 
 #Fb2S3(GROUP, ACCESS_TOKEN, file, cascPath, bucket)
-createFromS3(COLLECTION, ACCOUNT, region, bucket)
-# createFromFB()
-# createFromDir(COLLECTION, DIR)
+#createFromS3(COLLECTION, ACCOUNT, region, bucket)
+#createFromFB()
+createFromDir(COLLECTION, DIR)
