@@ -1,12 +1,15 @@
 import cv2
 import sys
 import boto3
+import msvcrt
+import polly
 
 ACCOUNT = 'perso'
 region = 'eu-west-1'
 client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
 
-SIMILARITY_THRESHOLD = 20.0
+SIMILARITY_THRESHOLD = 70.0
+COLLECTION = 'famille'
 
 cascPath = sys.argv[1]
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -17,7 +20,75 @@ video_capture = cv2.VideoCapture(0)
 ramp_frames = 5
 file = "C:\\Users\\mtryhoen\\Pictures\\test_image.png"
 
+def getinfo(target_bytes):
+    try:
+        faceinfo = client.detect_faces(
+            Image={
+                'Bytes': target_bytes,
+            },
+            Attributes=[
+                'ALL',
+            ]
+        ).get('FaceDetails', [])
+        gender=faceinfo[0]['Gender']['Value']
+        '''
+        glasses=faceinfo[0]['Eyeglasses']['Value']
+        for emotion in faceinfo[0]['Emotions']:
+            if emotion['Confidence'] > 50:
+                goodemotion=emotion['Type']
+                break
+            else:
+                goodemotion="Pas d'emotion"
+
+        if glasses:
+            glasses="lunettes"
+        else:
+            glasses="pas de lunettes"
+        '''
+
+        if gender == "Male":
+            gender="Monsieur"
+        else:
+            gender="Madame"
+
+
+        #if glasses == "True":
+        #    glasses="Venez profiter de nos promotions sur les lunettes"
+        #else:
+        #    glasses="Pas de lunettes"
+
+        # return ("Bonjour " + gender + ", " + glasses + ", " + goodemotion)
+        return (gender)
+
+    except:
+        return "Problem"
+
+def rekon(COLLECTION, target_bytes):
+    try:
+        collection_match = client.search_faces_by_image(
+            CollectionId= COLLECTION,
+            Image={
+                'Bytes': target_bytes
+            },
+            FaceMatchThreshold=SIMILARITY_THRESHOLD
+        ).get('FaceMatches', [])
+    except:
+        return("Pas reconnu.")
+
+    try:
+        if collection_match[0]['Similarity'] > 75:
+            ImageId = collection_match[0]['Face']['ExternalImageId']
+            return (ImageId)
+        else:
+            return("Pas reconnu...")
+    except:
+        return('Pas reconnu !')
+
+imageid=0
 while True:
+    if msvcrt.kbhit():
+        if ord(msvcrt.getch()) == 32:
+            break
     for i in range(ramp_frames):
         rettmp, frametmp = video_capture.read()
     # Capture frame-by-frame
@@ -38,43 +109,28 @@ while True:
         print('Y a personne')
     elif faces.size:
         cv2.imwrite(file, frame)
-        #print (faces)
-        #input("Press Enter to continue...")
+
         with open('C:\\Users\\mtryhoen\\Pictures\\test_image.png', 'rb') as target_image:
-        #with open('C:\\Users\\mtryhoen\\Pictures\\marie.jpg', 'rb') as target_image:
+        #with open('C:\\Users\\mtryhoen\\Pictures\\famille\\alice.jpg', 'rb') as target_image:
             target_bytes = target_image.read()
-        try:
-            collection_match = client.search_faces_by_image(
-                CollectionId='facedb',
-                Image={
-                    'Bytes': target_bytes
-                },
-                FaceMatchThreshold=SIMILARITY_THRESHOLD
-            ).get('FaceMatches',[])
-        except:
-            print ("Y a personne")
+        #target_bytes = frame.tobytes()
 
-        #print(type(collection_match[0]))
+        id=rekon(COLLECTION, target_bytes)
+        if imageid == id:
+            print("Deja vu!")
+            continue
+        elif "Pas reconnu" in id:
+            continue
+        else:
+            imageid=id
+            print(id)
 
-        try:
-            if collection_match[0]['Similarity'] > 75:
-                ImageId = collection_match[0]['Face']['ExternalImageId']
-                print("Salut " + ImageId + " !")
-            else:
-                print("Pas reconnu...")
-        except:
-            print('Pas reconnu !')
-    '''
-    # Draw a rectangle around the faces
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-    # Display the resulting frame
-    cv2.imshow('Video', frame)
-
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    '''
+        gender=getinfo(target_bytes)
+        text="Bonjour " + gender + ". Vous vous appelez " + imageid + ". N'est-ce pas?"
+        if id == "nico":
+            text=text + " Est-ce que la collection SALLSKAP vous plait?"
+        polly.talk(text)
+        #print(gender)
 
 # When everything is done, release the capture
 video_capture.release()
