@@ -3,10 +3,8 @@ import json
 import urllib.request as urllib2
 import urllib.parse as urllib
 import io
-import requests
 import unicodedata
 import os
-from random import randint
 import cv2
 import sys
 
