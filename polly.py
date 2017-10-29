@@ -8,7 +8,7 @@ import subprocess
 from tempfile import gettempdir
 
 
-ACCOUNT = 'perso'
+ACCOUNT = 'default' #'perso'
 region = 'eu-west-1'
 
 # Create a client using the credentials and region defined in the [adminuser]

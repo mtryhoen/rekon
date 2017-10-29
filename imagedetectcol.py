@@ -1,10 +1,10 @@
 import cv2
 import sys
 import boto3
-import msvcrt
+# import msvcrt
 import polly
 
-ACCOUNT = 'perso'
+ACCOUNT = 'default'#'perso'
 region = 'eu-west-1'
 client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
 
@@ -86,9 +86,9 @@ def rekon(COLLECTION, target_bytes):
 
 imageid=0
 while True:
-    if msvcrt.kbhit():
-        if ord(msvcrt.getch()) == 32:
-            break
+    # if msvcrt.kbhit():
+    #     if ord(msvcrt.getch()) == 32:
+    #         break
     for i in range(ramp_frames):
         rettmp, frametmp = video_capture.read()
     # Capture frame-by-frame
