@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rekon</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.144.0.min.js"></script>
+    <script src="{{ url_for('static', filename='tracking-min.js') }}"></script>
+    <script src="{{ url_for('static', filename='face-min.js') }}"></script>
+    <script src="{{ url_for('static', filename='stats.min.js') }}"></script>
+</head>
+
+<body>
+
+ {% include 'include/_navbar.html' %}
+ <div class="container">
+ {% block body %}
+
+ {% endblock %}
+ </div>
+</body>
+</html>
