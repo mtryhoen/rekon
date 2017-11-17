@@ -18,7 +18,7 @@ def talk(text):
 
     try:
         # Request speech synthesis
-        response = polly.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId="Chantal")
+        response = polly.synthesize_speech(Text=text, OutputFormat="mp3", VoiceId="Mathieu")
     except (BotoCoreError, ClientError) as error:
         # The service returned an error, exit gracefully
         print(error)

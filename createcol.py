@@ -3,7 +3,7 @@ import json
 import urllib.request as urllib2
 import urllib.parse as urllib
 import io
-import requests
+
 import unicodedata
 import os
 from random import randint
@@ -11,17 +11,19 @@ import cv2
 import sys
 
 #GROUP = 'lecoursiermontois7000mons'
-GROUP = 'Fleurs a Couper'
+GROUP = "Ikea Achats/Ventes Belgique"
 #GROUP = 'Ducati DESMO Fans !!!!!'
 COLLECTION = 'famille'
 #COLLECTION = 'facedb'
 DIR = 'C:\\Users\\mtryhoen\\Pictures\\famille'
 file = "C:/Users/mtryhoen/Pictures/test_image.png"
-cascPath = sys.argv[1]
+cascPath = sys.argv[0]
 ACCOUNT = 'perso'
 region = 'eu-west-1'
 bucket="rekon-fbpics"
-ACCESS_TOKEN = 'EAACEdEose0cBAHCCXVLT5TAa6gKYsv9TuDMZBiZAWXT9WiRvKZCi7YZAZCmoAhMpkRSD4z4t64Vla9ZANWHibxhYZCn7f0ZCOMlIxS8QsziqzM98ZBoDxBAtEpBCRoFlEbIyQfkocHr3n3acdcgsUU4hE58tOR0KRE8gCahYVw5egRebjoqVyZAFHp'
+
+
+ACCESS_TOKEN = 'EAACEdEose0cBAO6CckG56PO87bQDbHw8fPJqXNJYh0mP8n2HvJVqw2M7DRg1Ed0dNHmZAUtZAqSo3sALLssI7quHnrvp8V3FIeeyrDuyNqR1hKeu2imSDkYjwwVI7wCbXasePKlr7CZBrhKnwKGLPZAG7y4TwKzK0enyHC5kWdc4XJtVoZC9OFmfnxZBw5sVkZD'
 
 
 def createFromDir(COLLECTION, DIR):
@@ -94,7 +96,7 @@ def createFromFB():
         try:
             url = members['paging']['next']
         except:
-            url = ""
+            url=""
 
     print(len(MEMID))
     exit(0)
