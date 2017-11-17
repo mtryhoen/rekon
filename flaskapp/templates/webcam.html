@@ -4,6 +4,8 @@
     <div class="container text-center"  id="container">
         <video autoplay="true" id="videoInput" width="320" height="240" style="border:10px solid #283136;"></video>
         <canvas id="canvasOutput" width="320" height="240" style="border:10px solid #283136;"></canvas>
+        <button type="button">Start</button>
+        <button type="button">Stop</button>
     </div>
     <script>
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
@@ -40,12 +42,9 @@
 
             // load pre-trained classifiers
             console.log('OK');
+            //classifier.load(url,analyze());
+            function analyze(){
             setTimeout(function(){
-                console.log(2);
-                classifier.load(url);
-            }, 2000);
-            setTimeout(function(){
-                console.log(3);
                 const FPS = 30;
                 function processVideo() {
                     try {
@@ -85,5 +84,7 @@
                 // schedule the first one.
                 setTimeout(processVideo, 0);
             }, 3000);
+            }
+            classifier.load(url,analyze());
     </script>
 {% endblock %}

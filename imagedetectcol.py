@@ -4,7 +4,7 @@ import boto3
 # import msvcrt
 import polly
 
-ACCOUNT = 'default'#'perso'
+ACCOUNT = 'default' # 'perso'
 region = 'eu-west-1'
 client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
 
@@ -16,7 +16,7 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 
 video_capture = cv2.VideoCapture(0)
 
-#Number of frames to throw away while the camera adjusts to light levels
+# Number of frames to throw away while the camera adjusts to light levels
 ramp_frames = 5
 file = "C:\\Users\\mtryhoen\\Pictures\\test_image.png"
 
