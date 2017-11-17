@@ -7,7 +7,7 @@ import polly
 from tkinter import *
 from PIL import ImageTk, Image
 
-ACCOUNT = 'default' # 'perso'
+ACCOUNT = 'perso'
 region = 'eu-west-1'
 SIMILARITY_THRESHOLD = 60.0
 COLLECTION = 'famille'
@@ -110,9 +110,9 @@ file = "C:\\Users\\mtryhoen\\Pictures\\test_image.png"
 client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
 imageid=0
 while True:
-    # if msvcrt.kbhit():
-    #     if ord(msvcrt.getch()) == 32:
-    #         break
+    if msvcrt.kbhit():
+        if ord(msvcrt.getch()) == 32:
+            break
     for i in range(ramp_frames):
         rettmp, frametmp = video_capture.read()
     # Capture frame-by-frame
