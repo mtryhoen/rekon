@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+    <div class="container text-center"  id="container">
+        <video id="video" width="320" height="240" preload autoplay loop muted></video>
+        <canvas id="canvas" width="320" height="240"></canvas>
+    </div>
+    <div class="container text-center"  id="container">
+        <button id="btn-start" type="button" class="btn btn-primary">Start</button>
+        <button id="btn-stop" type="button" class="btn btn-danger">Stop</button>
+    </div>
+  <script>
+    document.getElementById("btn-start").addEventListener("click", function(){
+        console.log('Start rekon');
+        trackerTask.run();
+        rekonInterval = setInterval(function() { rekon() }, 1000);
+    });
+    document.getElementById("btn-stop").addEventListener("click", function(){
+        trackerTask.stop();
+        clearInterval(rekonInterval);
+        console.log('STOP rekon');
+    });
+
+    function rekon() {
+      tracker.once('track', function(event) {
+        if (event.data.length === 0) {
+          // No targets were detected in this frame.
+          context.clearRect(0, 0, 320, 240);
+        } else {
+          console.log(event.data.length);
+          event.data.forEach(function(data) {
+            console.log('face detected');
+          });
+          context.drawImage(video, 0, 0, 320, 240);
+        }
+      });
+    }
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var tracker = new tracking.ObjectTracker('face');
+    tracker.setInitialScale(2);
+    tracker.setStepSize(1);
+    tracker.setEdgesDensity(0.1);
+    var trackerTask = tracking.track('#video', tracker, { camera: true, mediaConstraints: { frameRate: { max: 2} }});
+    trackerTask.stop();
+
+  </script>
+{% endblock %}
