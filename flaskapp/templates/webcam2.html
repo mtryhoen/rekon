@@ -14,13 +14,16 @@
     document.getElementById("btn-start").addEventListener("click", function(){
         console.log('Start rekon');
         trackerTask.run();
-        rekonInterval = setInterval(function() { rekon() }, 1000);
+        rekonInterval = setInterval(function() { rekon() }, 500);
     });
     document.getElementById("btn-stop").addEventListener("click", function(){
         trackerTask.stop();
         clearInterval(rekonInterval);
         console.log('STOP rekon');
     });
+
+    // Get aws credentials
+    var awsCred = awsCred()
 
     function rekon() {
       tracker.once('track', function(event) {
@@ -31,8 +34,14 @@
           console.log(event.data.length);
           event.data.forEach(function(data) {
             console.log('face detected');
+            context.drawImage(video, 0, 0, 320, 240);
+            context.strokeStyle = '#a64ceb';
+            context.strokeRect(data.x, data.y, data.width, data.height);
+            context.font = '11px Helvetica';
+            context.fillStyle = "#fff";
+            context.fillText('Face detected', data.x + data.width + 5, data.y + 11);
           });
-          context.drawImage(video, 0, 0, 320, 240);
+          //context.drawImage(video, 0, 0, 320, 240);
         }
       });
     }
