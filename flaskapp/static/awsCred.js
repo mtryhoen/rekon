@@ -1,7 +1,7 @@
 function awsCred(callback) {
 
     AWS.config.region = 'eu-west-1'; // Region
-    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+    var creds = AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: 'eu-west-1:5c811920-9ed9-4713-93b4-ce5ae70de196',
     });
     AWS.config.credentials.get(function(){
