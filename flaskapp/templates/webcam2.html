@@ -11,6 +11,10 @@
         <button id="btn-stop" type="button" class="btn btn-danger">Stop</button>
     </div>
   <script>
+    var accessKeyId;
+    var secretAccessKey;
+    var sessionToken;
+
     document.getElementById("btn-start").addEventListener("click", function(){
         console.log('Start rekon');
         trackerTask.run();
@@ -23,8 +27,11 @@
     });
 
     // Get aws credentials
-
-    awsCred();
+    awsCred(function(response){
+        // Here you have access to your variable
+        console.log(response);
+        // do rekon calls here
+    })
 
     function rekon() {
       tracker.once('track', function(event) {
