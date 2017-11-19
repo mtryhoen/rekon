@@ -14,10 +14,19 @@
         <br>
         <p id="name"></p>
     </div>
+    <div class="container text-center"  id="container">
+        <audio id="voice"  controls="controls" src="" type="audio/ogg"></audio>
+    </div>
   <script>
     var accessKeyId;
     var secretAccessKey;
     var sessionToken;
+    var collection = "famille";
+    var namediv = document.getElementById("name");
+    var voicediv = document.getElementById("voice");
+    var oldName0 = "0";
+    var oldName1 = "1";
+    var speech = 1;
 
     document.getElementById("btn-start").addEventListener("click", function(){
         console.log('Start rekon');
@@ -29,7 +38,6 @@
         clearInterval(rekonInterval);
         console.log('STOP rekon');
     });
-    var namediv = document.getElementById("name");
 
     function getBinary(base64Image) {
 
@@ -45,6 +53,7 @@
     }
 
     function rekon() {
+      // Find face in video
       tracker.once('track', function(event) {
         if (event.data.length === 0) {
           // No targets were detected in this frame.
@@ -66,19 +75,23 @@
             var img = getBinary(base64Image);
 
             // Get aws credentials
+
             awsCred(function(response){
                 // Here you have access to your variable
                 //console.log(response);
                 // do rekon calls here
                 var rekognition = new AWS.Rekognition();
                 var params = {
-                    CollectionId: "famille",
+                    CollectionId: collection,
                     FaceMatchThreshold: 70,
                     Image: {
                       Bytes: img
                     },
                     MaxFaces: 1
                 };
+
+                // Recognize face
+
                 rekognition.searchFacesByImage(params, function (err, data) {
                   if (err) {
                     console.log(err, err.stack); // an error occurred
@@ -86,10 +99,54 @@
                     if (data.FaceMatches.length === 0){
                         //console.log(data.FaceMatches.length);
                     } else {
+
                         var name = data.FaceMatches[0].Face.ExternalImageId;
                         console.log(data.FaceMatches[0].Face.ExternalImageId);
                         namediv.innerHTML = name;
+                        oldName1 = oldName0;
+                        oldName0 = name;
+                        console.log(name);
                     }
+                  }
+
+                  console.log("oldname1: " + oldName1 + " - Name " + oldName0);
+                  // synthesize speech
+                  if ( oldName0 === oldName1 || name == null ) {
+                  } else {
+                      var polly = new AWS.Polly();
+                      var text = "";
+                      if ( name == "alice" ) {
+                        text = "Joyeux anniversaire " + name;
+                      } else {
+                        text = "Salut " + name + " Bienvenu a l'anniversaire d'Alice ";
+                      }
+                      var params = {
+                        OutputFormat: "ogg_vorbis",
+                        SampleRate: "8000",
+                        Text: text,
+                        TextType: "text",
+                        VoiceId: "Celine"
+                      };
+                      polly.synthesizeSpeech(params, function(err, data) {
+                        if (err) {
+                          console.log(err, err.stack); // an error occurred
+                        } else {
+                          <!--data = {-->
+                           <!--AudioStream: <Binary String>,-->
+                           <!--ContentType: "audio/mpeg",-->
+                           <!--RequestCharacters: 37-->
+                          <!--}-->
+                          console.log(data); // successful response
+
+                          var uInt8Array = new Uint8Array(data.AudioStream);
+                          var arrayBuffer = uInt8Array.buffer;
+                          var blob = new Blob([arrayBuffer]);
+                          var url = URL.createObjectURL(blob);
+
+                          voicediv.src = url;
+                          voicediv.play();
+                        }
+                      });
                   }
                 });
             })
