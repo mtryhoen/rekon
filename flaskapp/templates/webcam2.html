@@ -36,6 +36,8 @@
     document.getElementById("btn-stop").addEventListener("click", function(){
         trackerTask.stop();
         clearInterval(rekonInterval);
+        oldName1 = "1";
+        oldName0 = "0";
         console.log('STOP rekon');
     });
 
@@ -101,22 +103,28 @@
                     } else {
 
                         var name = data.FaceMatches[0].Face.ExternalImageId;
-                        console.log(data.FaceMatches[0].Face.ExternalImageId);
                         namediv.innerHTML = name;
                         oldName1 = oldName0;
                         oldName0 = name;
-                        console.log(name);
+                        //console.log(name);
                     }
                   }
 
-                  console.log("oldname1: " + oldName1 + " - Name " + oldName0);
+                  //console.log("oldname1: " + oldName1 + " - Name " + oldName0);
                   // synthesize speech
                   if ( oldName0 === oldName1 || name == null ) {
                   } else {
                       var polly = new AWS.Polly();
                       var text = "";
-                      if ( name == "alice" ) {
-                        text = "Joyeux anniversaire " + name;
+                      if ( name == "antoine" ) {
+                        //text = "Joyeux anniversaire " + name;
+                        text = "salut " + name + " sa va?";
+                      } else if ( name == "maxime" ) {
+                        text = "salut " + name + " sa va?";
+                      } else if ( name == "alice" ) {
+                        text = "salut " + name + " sa va?";
+                      } else if ( name == "marie" ) {
+                        text = "salut " + name + " tu es vraiment la plus belle";
                       } else {
                         text = "Salut " + name + " Bienvenu a l'anniversaire d'Alice ";
                       }
@@ -136,7 +144,7 @@
                            <!--ContentType: "audio/mpeg",-->
                            <!--RequestCharacters: 37-->
                           <!--}-->
-                          console.log(data); // successful response
+                          //console.log(data); // successful response
 
                           var uInt8Array = new Uint8Array(data.AudioStream);
                           var arrayBuffer = uInt8Array.buffer;
