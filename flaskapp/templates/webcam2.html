@@ -31,7 +31,7 @@
     document.getElementById("btn-start").addEventListener("click", function(){
         console.log('Start rekon');
         trackerTask.run();
-        rekonInterval = setInterval(function() { rekon() }, 300);
+        rekonInterval = setInterval(function() { rekon() }, 500);
     });
     document.getElementById("btn-stop").addEventListener("click", function(){
         trackerTask.stop();
@@ -85,7 +85,7 @@
                 var rekognition = new AWS.Rekognition();
                 var params = {
                     CollectionId: collection,
-                    FaceMatchThreshold: 70,
+                    FaceMatchThreshold: 65,
                     Image: {
                       Bytes: img
                     },
