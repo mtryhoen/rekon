@@ -16,5 +16,6 @@ Install
   
 # Webapp
 
-docker login
-docker pull mtryhoen/rekon:v0
+docker login \
+docker pull mtryhoen/rekon:v0 \
+docker run -d -p 5000:5000 rekon:vo 
