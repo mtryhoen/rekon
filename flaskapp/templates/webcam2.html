@@ -70,7 +70,7 @@
             context.strokeRect(data.x, data.y, data.width, data.height);
             context.font = '11px Helvetica';
             context.fillStyle = "#fff";
-            //context.fillText('Face detected', data.x + data.width + 5, data.y + 11);
+            context.fillText('Face detected', data.x + data.width + 5, data.y + 11);
 
             var imgstring = canvas.toDataURL('image/jpeg');
             var base64Image = imgstring.replace(/^data:image\/(png|jpeg|jpg);base64,/, "")
@@ -106,7 +106,7 @@
                         namediv.innerHTML = name;
                         oldName1 = oldName0;
                         oldName0 = name;
-                        //console.log(name);
+                        console.log(name);
                     }
                   }
 

@@ -12,3 +12,9 @@ Install
 
  Clone the repo:
   - git clone https://github.com/mtryhoen/rekon
+  
+  
+# Webapp
+
+docker login
+docker pull mtryhoen/rekon:v0
