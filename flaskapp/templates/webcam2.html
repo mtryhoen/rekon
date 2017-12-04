@@ -17,6 +17,7 @@
     <div class="container text-center"  id="container">
         <audio id="voice"  controls="controls" src="" type="audio/ogg"></audio>
     </div>
+    
   <script>
     var accessKeyId;
     var secretAccessKey;
@@ -30,10 +31,14 @@
 
     document.getElementById("btn-start").addEventListener("click", function(){
         console.log('Start rekon');
+        voicediv.style.visibility='visible';
+        voicediv.muted=false;
         trackerTask.run();
         rekonInterval = setInterval(function() { rekon() }, 500);
     });
     document.getElementById("btn-stop").addEventListener("click", function(){
+        voicediv.muted=true;
+        voicediv.style.visibility='hidden';
         trackerTask.stop();
         clearInterval(rekonInterval);
         oldName1 = "1";
@@ -98,10 +103,10 @@
                   if (err) {
                     console.log(err, err.stack); // an error occurred
                   } else {
+                    // console.log(data.FaceMatches.length);
                     if (data.FaceMatches.length === 0){
-                        //console.log(data.FaceMatches.length);
                     } else {
-
+                        // console.log(data.FaceMatches);
                         var name = data.FaceMatches[0].Face.ExternalImageId;
                         namediv.innerHTML = name;
                         oldName1 = oldName0;
@@ -132,11 +137,6 @@
                         if (err) {
                           console.log(err, err.stack); // an error occurred
                         } else {
-                          <!--data = {-->
-                           <!--AudioStream: <Binary String>,-->
-                           <!--ContentType: "audio/mpeg",-->
-                           <!--RequestCharacters: 37-->
-                          <!--}-->
                           //console.log(data); // successful response
 
                           var uInt8Array = new Uint8Array(data.AudioStream);

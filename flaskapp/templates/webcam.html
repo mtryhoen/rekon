@@ -1,90 +1,125 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+
     <div class="container text-center"  id="container">
-        <video autoplay="true" id="videoInput" width="320" height="240" style="border:10px solid #283136;"></video>
-        <canvas id="canvasOutput" width="320" height="240" style="border:10px solid #283136;"></canvas>
-        <button type="button">Start</button>
-        <button type="button">Stop</button>
+        <video id="video" width="640" height="480" preload autoplay loop muted></video>
+        <canvas id="canvas" width="640" height="480"></canvas>
     </div>
-    <script>
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-            .then(function(stream) {
-             video.srcObject = stream;
-             video.play();
-            })
-            .catch(function(err) {
-            console.log("An error occured! " + err);
-            });
+    <div class="container text-center"  id="container">
+        <button id="btn-start" type="button" class="btn btn-primary">Start</button>
+        <button id="btn-stop" type="button" class="btn btn-danger">Stop</button>
+    </div>
+    <div class="container text-center"  id="container">
+        <br>
+        <p id="name"></p>
+    </div>
 
-            let video = document.getElementById('videoInput');
-            let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-            let dst = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-            let gray = new cv.Mat();
-            let cap = new cv.VideoCapture(video);
-            let faces = new cv.RectVector();
-            let classifier = new cv.CascadeClassifier();
+  <script>
+    var accessKeyId;
+    var secretAccessKey;
+    var sessionToken;
+    var collection = "famille";
+    var namediv = document.getElementById("name");
+    var oldName0 = "0";
+    var oldName1 = "1";
 
-            let url = '';
-            let request = new XMLHttpRequest();
-            request.open('GET', '/static/haarcascade_frontalface_default.xml', true);
-            //request.responseType = "blob";
-            request.onreadystatechange = function () {
-              if(request.readyState === XMLHttpRequest.DONE && request.status === 200) {
-                console.log(1);
-                var data = new Blob([request.responseXML], {type: 'application/xml'});
-                url = window.URL.createObjectURL(data);
+    document.getElementById("btn-start").addEventListener("click", function(){
+        console.log('Start rekon');
+        trackerTask.run();
+        rekonInterval = setInterval(function() { rekon() }, 2000); 200 is good when people are walking#
+    });
+    document.getElementById("btn-stop").addEventListener("click", function(){
+        trackerTask.stop();
+        clearInterval(rekonInterval);
+        oldName1 = "1";
+        oldName0 = "0";
+        console.log('STOP rekon');
+    });
 
-                return url;
-              }
-            };
-            request.send();
+    function getBinary(base64Image) {
 
-            // load pre-trained classifiers
-            console.log('OK');
-            //classifier.load(url,analyze());
-            function analyze(){
-            setTimeout(function(){
-                const FPS = 30;
-                function processVideo() {
-                    try {
-                        //if (!streaming) {
-                            // clean and stop.
-                        //    src.delete();
-                        //    dst.delete();
-                        //    gray.delete();
-                        //   faces.delete();
-                        //    classifier.delete();
-                        //    return;
-                        //}
-                        let begin = Date.now();
-                        // start processing.
-                        cap.read(src);
-                        src.copyTo(dst);
-                        cv.cvtColor(dst, gray, cv.COLOR_RGBA2GRAY, 0);
-                        // detect faces.
-                        classifier.detectMultiScale(gray, faces, 1.1, 3, 0);
-                        // draw faces.
-                        for (let i = 0; i < faces.size(); ++i) {
-                            let face = faces.get(i);
-                            let point1 = new cv.Point(face.x, face.y);
-                            let point2 = new cv.Point(face.x + face.width, face.y + face.height);
-                            cv.rectangle(dst, point1, point2, [255, 0, 0, 255]);
-                        }
-                        cv.imshow('canvasOutput', dst);
-                        // schedule the next one.
-                        let delay = 1000/FPS - (Date.now() - begin);
-                        setTimeout(processVideo, delay);
-                    } catch (err) {
-                        //utils.printError(err);
-                        console.log(err);
-                    }
+       var binaryImg = atob(base64Image);
+       var length = binaryImg.length;
+       var ab = new ArrayBuffer(length);
+       var ua = new Uint8Array(ab);
+       for (var i = 0; i < length; i++) {
+         ua[i] = binaryImg.charCodeAt(i);
+        }
+
+        return ab;
+    }
+
+    function rekon() {
+      // Find face in video
+      tracker.once('track', function(event) {
+        if (event.data.length === 0) {
+          // No targets were detected in this frame.
+          context.clearRect(0, 0, 640, 480);
+          namediv.innerHTML = "";
+        } else {
+          //console.log(event.data.length);
+          event.data.forEach(function(data) {
+            //console.log('face detected');
+            context.drawImage(video, 0, 0, 640, 480);
+            context.strokeStyle = '#a64ceb';
+            context.strokeRect(data.x, data.y, data.width, data.height);
+            context.font = '11px Helvetica';
+            context.fillStyle = "#fff";
+            context.fillText('Face detected', data.x + data.width + 5, data.y + 11);
+
+            var imgstring = canvas.toDataURL('image/jpeg');
+            var base64Image = imgstring.replace(/^data:image\/(png|jpeg|jpg);base64,/, "")
+            var img = getBinary(base64Image);
+
+            // Get aws credentials
+
+            awsCred(function(response){
+                // Here you have access to your variable
+                //console.log(response);
+                // do rekon calls here
+                var rekognition = new AWS.Rekognition();
+                var params = {
+                    CollectionId: collection,
+                    FaceMatchThreshold: 65,
+                    Image: {
+                      Bytes: img
+                    },
+                    MaxFaces: 1
                 };
 
-                // schedule the first one.
-                setTimeout(processVideo, 0);
-            }, 3000);
-            }
-            classifier.load(url,analyze());
-    </script>
+                // Recognize face
+
+                rekognition.searchFacesByImage(params, function (err, data) {
+                  if (err) {
+                    console.log(err, err.stack); // an error occurred
+                  } else {
+                    // console.log(data.FaceMatches.length);
+                    if (data.FaceMatches.length === 0){
+                    } else {
+                        // console.log(data.FaceMatches);
+                        var name = data.FaceMatches[0].Face.ExternalImageId;
+                        namediv.innerHTML = name;
+                        oldName1 = oldName0;
+                        oldName0 = name;
+                        console.log(name);
+                    }
+                  }
+                });
+            })
+          });
+        }
+      });
+    }
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+    var tracker = new tracking.ObjectTracker('face');
+    tracker.setInitialScale(2);
+    tracker.setStepSize(1);
+    tracker.setEdgesDensity(0.1);
+    var trackerTask = tracking.track('#video', tracker, { camera: true, mediaConstraints: { frameRate: { max: 2} }});
+    trackerTask.stop();
+
+  </script>
 {% endblock %}
