@@ -1,17 +1,17 @@
 import cv2
 import boto3
-import msvcrt
+#import msvcrt
 import webbrowser
 import os
 import polly
-from tkinter import *
-from PIL import ImageTk, Image
+#from tkinter import *
+#from PIL import ImageTk, Image
 
 ACCOUNT = 'perso'
 region = 'eu-west-1'
 SIMILARITY_THRESHOLD = 60.0
 COLLECTION = 'famille'
-cascPath = sys.argv[1]
+cascPath = 'haarcascade_frontalface_default.xml' #sys.argv[1]
 
 ############################# Face attributes detection #####################################3
 def getinfo(target_bytes):
@@ -102,17 +102,17 @@ def displayimage(pic):
 ################################## MAIN LOOP ################################################
 
 faceCascade = cv2.CascadeClassifier(cascPath)
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture()
 #Number of frames to throw away while the camera adjusts to light levels
 ramp_frames = 5
 file = "C:\\Users\\mtryhoen\\Pictures\\test_image.png"
 
-client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
+#client = boto3.Session(profile_name=ACCOUNT, region_name=region).client('rekognition')
 imageid=0
 while True:
-    if msvcrt.kbhit():
-        if ord(msvcrt.getch()) == 32:
-            break
+    #if msvcrt.kbhit():
+    #   if ord(msvcrt.getch()) == 32:
+    #       break
     for i in range(ramp_frames):
         rettmp, frametmp = video_capture.read()
     # Capture frame-by-frame
@@ -131,7 +131,10 @@ while True:
 
     if type(faces) is tuple:
         print('Y a personne')
+        exit(1)
     elif faces.size:
+        print('Y a qqu')
+        exit(1)
         cv2.imwrite(file, frame)
 
         with open(file, 'rb') as target_image:

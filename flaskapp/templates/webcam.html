@@ -3,8 +3,12 @@
 {% block body %}
 
     <div class="container text-center"  id="container">
-        <video id="video" width="640" height="480" preload autoplay loop muted></video>
-        <canvas id="canvas" width="640" height="480"></canvas>
+        <img id="video" src="http://192.168.0.26:80/mjpg/video.mjpg" width="320" height="240">
+        <!--
+        rtsp://85.27.25.112/ipcam.sdp
+        <video id="video" width="320" height="240" preload autoplay loop muted></video>
+        -->
+        <canvas id="canvas" width="320" height="240"></canvas>
     </div>
     <div class="container text-center"  id="container">
         <button id="btn-start" type="button" class="btn btn-primary">Start</button>
@@ -27,7 +31,7 @@
     document.getElementById("btn-start").addEventListener("click", function(){
         console.log('Start rekon');
         trackerTask.run();
-        rekonInterval = setInterval(function() { rekon() }, 2000); 200 is good when people are walking#
+        rekonInterval = setInterval(function() { rekon() }, 2000);
     });
     document.getElementById("btn-stop").addEventListener("click", function(){
         trackerTask.stop();
@@ -36,6 +40,19 @@
         oldName0 = "0";
         console.log('STOP rekon');
     });
+
+    // Prefer camera resolution nearest to 1280x720.
+    <!--var constraints = { audio: false, video: { width: 320, height: 240 } };-->
+
+    <!--navigator.mediaDevices.getUserMedia(constraints)-->
+    <!--.then(function(mediaStream) {-->
+      <!--var video = document.querySelector('video');-->
+      <!--video.srcObject = mediaStream;-->
+      <!--video.onloadedmetadata = function(e) {-->
+        <!--video.play();-->
+      <!--};-->
+    <!--})-->
+    <!--.catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.-->
 
     function getBinary(base64Image) {
 
@@ -55,13 +72,13 @@
       tracker.once('track', function(event) {
         if (event.data.length === 0) {
           // No targets were detected in this frame.
-          context.clearRect(0, 0, 640, 480);
+          context.clearRect(0, 0, 320, 240);
           namediv.innerHTML = "";
         } else {
           //console.log(event.data.length);
           event.data.forEach(function(data) {
             //console.log('face detected');
-            context.drawImage(video, 0, 0, 640, 480);
+            context.drawImage(video, 0, 0, 320, 240);
             context.strokeStyle = '#a64ceb';
             context.strokeRect(data.x, data.y, data.width, data.height);
             context.font = '11px Helvetica';
@@ -69,7 +86,7 @@
             context.fillText('Face detected', data.x + data.width + 5, data.y + 11);
 
             var imgstring = canvas.toDataURL('image/jpeg');
-            var base64Image = imgstring.replace(/^data:image\/(png|jpeg|jpg);base64,/, "")
+            var base64Image = imgstring.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
             var img = getBinary(base64Image);
 
             // Get aws credentials
@@ -118,7 +135,7 @@
     tracker.setInitialScale(2);
     tracker.setStepSize(1);
     tracker.setEdgesDensity(0.1);
-    var trackerTask = tracking.track('#video', tracker, { camera: true, mediaConstraints: { frameRate: { max: 2} }});
+    var trackerTask = tracking.track('#video', tracker, { mediaConstraints: { frameRate: { max: 2} }});
     trackerTask.stop();
 
   </script>

@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+    <div class="container text-center"  id="container1">
+        <img id="video" src="http://facerekon.ddns.net:5001/camvideo.jpg" width="320" height="240">
+        <!--
+        rtsp://85.27.25.112/ipcam.sdp
+        <video id="video" width="320" height="240" preload autoplay loop muted></video>
+        -->
+        <canvas id="canvas" width="320" height="240"></canvas>
+    </div>
+    <div class="container text-center"  id="container2">
+        <button id="btn-start" type="button" class="btn btn-primary">Start</button>
+        <button id="btn-stop" type="button" class="btn btn-danger">Stop</button>
+    </div>
+    <div class="container text-center"  id="container3">
+        <br>
+        <p id="name"></p>
+    </div>
+
+  <script>
+    var accessKeyId;
+    var secretAccessKey;
+    var sessionToken;
+    var collection = "famille";
+    var namediv = document.getElementById("name");
+    var oldName0 = "0";
+    var oldName1 = "1";
+
+    document.getElementById("btn-start").addEventListener("click", function(){
+        console.log('Start rekon');
+        rekonInterval = setInterval(function() { rekon() }, 2000);
+        console.log(rekonInterval);
+    });
+    document.getElementById("btn-stop").addEventListener("click", function(){
+        clearInterval(rekonInterval);
+        oldName1 = "1";
+        oldName0 = "0";
+        console.log('STOP rekon');
+    });
+
+    // Prefer camera resolution nearest to 1280x720.
+    <!--var constraints = { audio: false, video: { width: 320, height: 240 } };-->
+
+    <!--navigator.mediaDevices.getUserMedia(constraints)-->
+    <!--.then(function(mediaStream) {-->
+      <!--var video = document.querySelector('video');-->
+      <!--video.srcObject = mediaStream;-->
+      <!--video.onloadedmetadata = function(e) {-->
+        <!--video.play();-->
+      <!--};-->
+    <!--})-->
+    <!--.catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.-->
+
+    function getBinary(base64Image) {
+
+       var binaryImg = atob(base64Image);
+       var length = binaryImg.length;
+       var ab = new ArrayBuffer(length);
+       var ua = new Uint8Array(ab);
+       for (var i = 0; i < length; i++) {
+         ua[i] = binaryImg.charCodeAt(i);
+        }
+
+        return ab;
+    }
+
+    function formattedDate(d = new Date) {
+      let month = String(d.getMonth() + 1);
+      let day = String(d.getDate());
+      const year = String(d.getFullYear());
+      let hour = String(d.getHours());
+      let min = String(d.getMinutes());
+      let sec = String(d.getSeconds());
+
+      return `${year}${month}${day}${hour}${min}${sec}`;
+    }
+
+    function addPhoto() {
+        var s3 = new AWS.S3({
+          apiVersion: '2006-03-01',
+          params: {Bucket: 'rekon-fbpics'}
+        });
+      var file = document.getElementById('video');
+      var fileName = formattedDate();
+      console.log(fileName);
+
+      s3.upload({
+        Key: fileName,
+        Body: file
+      }, function(err, data) {
+        if (err) {
+          return alert('There was an error uploading image: ', err.message);
+        }
+        console.log('Successfully uploaded photo.');
+      });
+    }
+
+    function rekon() {
+      // Find face in video
+        context.drawImage(video, 0, 0, 320, 240);
+        var imgstring = canvas.toDataURL('image/jpeg');
+        var base64Image = imgstring.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+        var img = getBinary(base64Image);
+
+        // Get aws credentials
+
+        awsCred(function(response){
+            // Here you have access to your variable
+            //console.log(response);
+
+            // do rekon calls here
+            var rekognition = new AWS.Rekognition();
+            var params = {
+                CollectionId: collection,
+                FaceMatchThreshold: 65,
+                Image: {
+                  Bytes: img
+                },
+                MaxFaces: 1
+            };
+
+            // Recognize face
+
+            rekognition.searchFacesByImage(params, function (err, data) {
+              if (err) {
+                console.log(err, err.stack); // an error occurred
+              } else {
+                // console.log(data.FaceMatches.length);
+                if (data.FaceMatches.length === 0){
+                } else {
+                    // console.log(data.FaceMatches);
+                    var name = data.FaceMatches[0].Face.ExternalImageId;
+                    namediv.innerHTML = name;
+                    oldName1 = oldName0;
+                    oldName0 = name;
+                    console.log(name);
+                }
+              }
+            });
+        })
+      };
+
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+
+  </script>
+{% endblock %}
