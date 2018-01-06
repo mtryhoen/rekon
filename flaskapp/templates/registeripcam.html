@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container text-left"  id="container">
+  <h1>IP Cameras</h1>
+  <form action="" method="POST">
+    <div class="form-group">
+      <label>Register new IP camera</label>
+      <p>Enter the snapshot url in the text field</p>
+      <input type="text" name="ipcam" class="form-control" value={{request.form.ipcam}}>
+      <br>
+      <p>Enter the video url in the text field</p>
+      <input type="text" name="ipcamvid" class="form-control" value={{request.form.ipcamvid}}>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  <br>
+  <label>List of registered IP cameras</label>
+  <ul class="list-group">
+    {% for ipcam, ipcamvid in ipcam2lists %}
+    <li class="list-group-item">
+        <div class="row">
+            <div class="col-xs-6">
+                <a href={{ipcamvid['S']}}>{{ipcamvid['S']}}</a>
+            </div>
+            <div class="col-xs-6">
+                <img id="ipcam" src={{ipcam['S']}} width="320" height="240">
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+{% endblock %}

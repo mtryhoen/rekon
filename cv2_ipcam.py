@@ -4,8 +4,11 @@ import numpy as np
 import requests
 import datetime
 import time
+import sys
 
-url = 'http://facerekon.ddns.net:5001/camvideo.jpg'
+url = sys.argv[2]  # 'http://facerekon.ddns.net:5001/camvideo.jpg'
+username = sys.argv[1]
+username = username.replace('@', '-')
 bucket='rekon-fbpics'
 
 def url_to_image(url):
@@ -52,5 +55,5 @@ while True:
                 ACL='public-read',
                 Body=bytes,
                 Bucket=bucket,
-                Key=filename
+                Key=username + '/' + filename
             )
