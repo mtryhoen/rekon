@@ -21,7 +21,7 @@
     function addPhoto() {
         var files = document.getElementById('files').files;
         if (!files.length) {
-        return alert('Please choose a file to upload first.');
+            console.log('no file selected');
         }
         var file = files[0];
         var fileName = file.name;

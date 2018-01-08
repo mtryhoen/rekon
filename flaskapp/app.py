@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, flash, redirect, url_for, session, logging
-import boto3
+import boto3, datetime
 from wtforms import Form, StringField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
@@ -16,6 +16,13 @@ def is_logged_in(f):
             flash('Please login', 'danger')
             return redirect(url_for('login'))
     return wrap
+
+#  Session timeout
+@app.before_request
+def before_request():
+    session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(minutes=30)
+    session.modified = True
 
 @app.route('/home')
 @is_logged_in
