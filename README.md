@@ -19,3 +19,12 @@ Install
 docker login \
 docker pull mtryhoen/rekon:v0 \
 docker run -d -p 5000:5000 rekon:vo 
+
+# lambda
+
+To zip the function:
+Install required modules in same dir as python script:
+pip3 install pillow -t .
+cd in the directory where all modules are installed
+then
+zip -r9 rekon_lambda.zip rekon_lambda.py PIL <other module dir>
