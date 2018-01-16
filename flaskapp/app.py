@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, flash, redirect, url_for, session, logging
-import boto3, datetime
-from wtforms import Form, StringField, PasswordField, validators
+import boto3
+import datetime
+from wtforms import Form, StringField, PasswordField, validators, SelectField
 from passlib.hash import sha256_crypt
 from functools import wraps
 
@@ -34,10 +35,63 @@ def home():
 def index():
     return render_template('index.html')
 
-@app.route('/collections')
+class RegisterCollection(Form):
+    collection = StringField('Enter new collection name', [validators.length(min=4, max=50)])
+
+@app.route('/collections', methods=['GET', 'POST'])
 @is_logged_in
 def collections():
-    return render_template('collections.html')
+    form = RegisterCollection(request.form)
+    ddb = boto3.client('dynamodb')
+    email = session['username']
+    if request.method == 'POST' and form.validate():
+        collection = form.collection.data
+        try:
+            response = ddb.update_item(
+                UpdateExpression="SET collections = list_append(collections, :col)",
+                ExpressionAttributeValues={
+                    ':col': {
+                        "L": [
+                            {"S": collection}
+                        ]
+                    },
+                },
+                Key={
+                    'email': {
+                        'S': email,
+                    },
+                },
+                TableName='users',
+            )
+            return redirect(url_for('collections'))
+        except:
+            flash('Could not create new collection', 'danger')
+            return redirect(url_for('collections'))
+
+    else:
+        try:
+            response = ddb.get_item(
+                Key={
+                    'email': {
+                        'S': email,
+                    },
+                },
+                TableName='users',
+            )
+
+            collections = response['Item']['collections']['L']
+
+        except:
+            collections = []
+
+        return render_template('collections.html', form=form, collections=collections)
+
+
+@app.route('/photos/<string:id>/')
+@is_logged_in
+def photos(id):
+    return render_template('photo.html', collection=id)
+
 
 class RegisterForm(Form):
     email = StringField('Email', [validators.length(min=6, max=50)])
@@ -67,6 +121,9 @@ def register():
                     'L': [],
                 },
                 'ipcamvid': {
+                    'L': [],
+                },
+                'collections': {
                     'L': [],
                 },
             },
@@ -125,6 +182,7 @@ def logout():
 class RegisterIpcam(Form):
     ipcam = StringField('ipcam', [validators.length(min=6, max=200)])
     ipcamvid = StringField('ipcamvid', [validators.length(min=6, max=200)])
+    collection = SelectField('collection')
 
 @app.route('/registeripcam', methods=['GET', 'POST'])
 @is_logged_in
@@ -135,13 +193,16 @@ def registeripcam():
     if request.method == 'POST' and form.validate():
         ipcam = form.ipcam.data
         ipcamvid = form.ipcamvid.data
+        collection = form.collection.data
+
         try:
             response = ddb.update_item(
                 UpdateExpression="SET ipcam = list_append(ipcam, :cam), ipcamvid = list_append(ipcamvid, :camvid)",
                 ExpressionAttributeValues={
                     ':cam': {
                         "L": [
-                            {"S": ipcam}
+                            #{"S": ipcam}
+                            {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collection}}}
                         ]
                     },
                     ':camvid': {
@@ -175,10 +236,13 @@ def registeripcam():
 
             ipcamlist = response['Item']['ipcam']['L']
             ipcamvidlist = response['Item']['ipcamvid']['L']
+            collections = response['Item']['collections']['L']
 
         except:
             ipcamlist = []
-        return render_template('registeripcam.html', ipcam2lists=zip(ipcamlist, ipcamvidlist))
+            collections = []
+
+        return render_template('registeripcam.html', ipcam2lists=zip(ipcamlist, ipcamvidlist), camCollections=collections)
 
 if __name__ == '__main__':
     app.secret_key='TheSecretKey!'

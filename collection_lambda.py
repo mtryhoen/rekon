@@ -3,7 +3,7 @@ import boto3
 rekognition = boto3.client('rekognition', region_name='eu-west-1')
 s3con = boto3.client('s3', region_name='eu-west-1')
 
-def update_col(COLLECTION, bucket):
+def update_col(COLLECTION, bucket, prefix):
 
     collections = rekognition.list_collections().get('CollectionIds', [])
     if COLLECTION not in collections:
@@ -23,7 +23,7 @@ def update_col(COLLECTION, bucket):
     istrunk=1
     marker=''
     while istrunk:
-        objects = s3con.list_objects(Bucket=bucket, Marker=marker)
+        objects = s3con.list_objects(Bucket=bucket, Prefix=prefix, Marker=marker)
         photos = objects.get('Contents')
         marker = objects.get('NextMarker')
         print(bucket)
@@ -52,14 +52,16 @@ def lambda_handler(event, context):
     # Get the object from the event
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = event['Records'][0]['s3']['object']['key']
-    COLLECTION, photo = key.split('/')
+    user, COLLECTION, photo = key.split('/')
+    collectionName = user + "-" + COLLECTION
+    prefix = user + "/" + COLLECTION
 
     try:
 
         # Calls Amazon Rekognition IndexFaces API to detect faces in S3 object
         # to index faces into specified collection
 
-        response = update_col(COLLECTION, bucket)
+        response = update_col(collectionName, bucket, prefix)
 
     except Exception as e:
         print(e)

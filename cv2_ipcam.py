@@ -100,5 +100,5 @@ else:
                     ACL='public-read',
                     Body=bytes,
                     Bucket=bucket,
-                    Key=username + '/' + filename
+                    Key=username + '/' + + '/' + filename
                 )

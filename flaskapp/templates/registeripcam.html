@@ -11,6 +11,13 @@
       <br>
       <p>Enter the video url in the text field</p>
       <input type="text" name="ipcamvid" class="form-control" value={{request.form.ipcamvid}}>
+      <br>
+      <p>Enter the collection to associate with this camera</p>
+      <select type="text" name="collection" class="form-control" value={{request.form.collection}}>
+          {% for camCollection in camCollections %}
+            <option value={{camCollection['S']}}>{{camCollection['S']}}</option>
+          {% endfor %}
+      </select>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
@@ -20,11 +27,14 @@
     {% for ipcam, ipcamvid in ipcam2lists %}
     <li class="list-group-item">
         <div class="row">
-            <div class="col-xs-6">
-                <a href={{ipcamvid['S']}}>{{ipcamvid['S']}}</a>
+            <div class="col-xs-4">
+                    <a href={{ipcamvid['S']}} target="_blank">Live stream</a>
             </div>
-            <div class="col-xs-6">
-                <img id="ipcam" src={{ipcam['S']}} width="320" height="240">
+            <div class="col-xs-4">
+                <img id="ipcam" src={{ipcam['S']}} width="160" height="120">
+            </div>
+            <div class="col-xs-4">
+                <p id="ipcamcol">collection name</p>
             </div>
         </div>
     </li>
