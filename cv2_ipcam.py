@@ -7,19 +7,29 @@ import time
 import sys
 import subprocess
 
-# url = sys.argv[2]  # 'http://facerekon.ddns.net:5001/camvideo.jpg'
-# email = sys.argv[1]
-argument = sys.argv[1]
+collectionToUse = ''
+usernameToUse = ''
+
+if len(sys.argv) == 1:
+    print("parameter has to be your email address")
+    exit(1)
+elif len(sys.argv) == 2:
+    argument1 = sys.argv[1]
+elif len(sys.argv) == 4:
+    argument1 = sys.argv[1]
+    collectionToUse = sys.argv[2]
+    usernameToUse = sys.argv[3]
+
 url = ''
 email = ''
 master = 'y'
 
 # check if process is master
-if 'http' in argument:
-    url = argument
+if 'http' in argument1:
+    url = argument1
     master = 'n'
 else:
-    email = argument
+    email = argument1
 
 username = email.replace('@', '-')
 bucket = 'rekon-fbpics'
@@ -58,8 +68,9 @@ if master == 'y':
         #  start subprocess here
         for ipcam in ipcamlist:
             print(url)
-            url = ipcam['S']
-            proc = subprocess.Popen(['python3', 'cv2_ipcam.py', url])
+            url = ipcam['M']['Ipcam']['S']
+            collection = ipcam['M']['Collection']['S']
+            proc = subprocess.Popen(['python3', 'cv2_ipcam.py', url, collection, username])
             proclist.append(proc)
         # wait before checking DB again
         time.sleep(30)
@@ -78,7 +89,6 @@ else:
         b = bytes.find(b'\xff\xd9')
         if a != -1 and b != -1:
             jpg = bytes[a:b+2]
-            #bytes = bytes[b+2:]
             img = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -100,5 +110,18 @@ else:
                     ACL='public-read',
                     Body=bytes,
                     Bucket=bucket,
-                    Key=username + '/' + + '/' + filename
+                    Key=usernameToUse + '/' + filename
+                )
+
+                response = s3con.put_object_tagging(
+                    Bucket=bucket,
+                    Key=usernameToUse + '/' + filename,
+                    Tagging={
+                        'TagSet': [
+                            {
+                                'Key': 'collection',
+                                'Value': str(collectionToUse)
+                            }
+                        ]
+                    }
                 )

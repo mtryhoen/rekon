@@ -182,7 +182,7 @@ def logout():
 class RegisterIpcam(Form):
     ipcam = StringField('ipcam', [validators.length(min=6, max=200)])
     ipcamvid = StringField('ipcamvid', [validators.length(min=6, max=200)])
-    collection = SelectField('collection')
+    collection = SelectField('collection', [validators.length(min=6, max=200)])
 
 @app.route('/registeripcam', methods=['GET', 'POST'])
 @is_logged_in
@@ -190,10 +190,26 @@ def registeripcam():
     form = RegisterIpcam(request.form)
     ddb = boto3.client('dynamodb')
     email = session['username']
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         ipcam = form.ipcam.data
         ipcamvid = form.ipcamvid.data
         collection = form.collection.data
+
+        response = ddb.get_item(
+            Key={
+                'email': {
+                    'S': email,
+                },
+            },
+            TableName='users',
+        )
+
+        ipcamlist = response['Item']['ipcam']['L']
+
+        for ipcamexist in ipcamlist:
+            if ipcam == ipcamexist['M']['Ipcam']['S']:
+                flash('IP camera already defined', 'danger')
+                return redirect(url_for('registeripcam'))
 
         try:
             response = ddb.update_item(
@@ -242,7 +258,7 @@ def registeripcam():
             ipcamlist = []
             collections = []
 
-        return render_template('registeripcam.html', ipcam2lists=zip(ipcamlist, ipcamvidlist), camCollections=collections)
+        return render_template('registeripcam.html', ipcam2lists=zip(ipcamlist, ipcamvidlist), camcollections=collections)
 
 if __name__ == '__main__':
     app.secret_key='TheSecretKey!'

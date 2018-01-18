@@ -13,9 +13,9 @@
       <input type="text" name="ipcamvid" class="form-control" value={{request.form.ipcamvid}}>
       <br>
       <p>Enter the collection to associate with this camera</p>
-      <select type="text" name="collection" class="form-control" value={{request.form.collection}}>
-          {% for camCollection in camCollections %}
-            <option value={{camCollection['S']}}>{{camCollection['S']}}</option>
+      <select type="text" name="collection" class="form-control">
+          {% for camcollection in camcollections %}
+            <option value={{camcollection['S']}}>{{camcollection['S']}}</option>
           {% endfor %}
       </select>
     </div>
@@ -31,10 +31,10 @@
                     <a href={{ipcamvid['S']}} target="_blank">Live stream</a>
             </div>
             <div class="col-xs-4">
-                <img id="ipcam" src={{ipcam['S']}} width="160" height="120">
+                <img id="ipcam" src={{ipcam['M']['Ipcam']['S']}} width="160" height="120">
             </div>
             <div class="col-xs-4">
-                <p id="ipcamcol">collection name</p>
+                <p id="ipcamcol">{{ipcam['M']['Collection']['S']}}</p>
             </div>
         </div>
     </li>

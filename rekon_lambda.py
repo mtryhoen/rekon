@@ -32,8 +32,22 @@ def get_image(bucket, key):
     s3 = boto3.resource('s3')
     s3.meta.client.download_file(bucket, key, '/tmp/image.jpg')
 
+def get_collection(bucket, key):
+    # get object tags
+    response = s3con.get_object_tagging(
+        Bucket=bucket,
+        Key=key
+    )
+    Tags = response['TagSet']
+    for tag in Tags:
+        if tag['Key'] == 'collection':
+            return tag['Value']
+
 def detect_faces(bucket, key):
     get_image(bucket, key)
+    prefix, id = key.split('/')
+    collection = get_collection(bucket, key)
+    collectionid = prefix + '-' + collection
     response = rekognition.detect_faces(
         Image={
             "S3Object": {
@@ -68,7 +82,7 @@ def detect_faces(bucket, key):
 
         # Submit individually cropped image to Amazon Rekognition
         response = rekognition.search_faces_by_image(
-            CollectionId='famille',
+            CollectionId=collectionid,
             Image={'Bytes': image_crop_binary}
         )
 

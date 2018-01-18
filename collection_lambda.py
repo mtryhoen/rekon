@@ -30,7 +30,7 @@ def update_col(COLLECTION, bucket, prefix):
         print(photos)
 
         for photo in photos:
-            imgname = photo['Key'].split("/")[1].split(".")[0]
+            imgname = photo['Key'].split("/")[2].split(".")[0]
             imgkey = photo['Key']
             response = rekognition.index_faces(
                 CollectionId=COLLECTION,
@@ -54,7 +54,7 @@ def lambda_handler(event, context):
     key = event['Records'][0]['s3']['object']['key']
     user, COLLECTION, photo = key.split('/')
     collectionName = user + "-" + COLLECTION
-    prefix = user + "/" + COLLECTION
+    prefix = user + "/" + COLLECTION + "/"
 
     try:
 
