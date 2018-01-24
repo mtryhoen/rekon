@@ -129,36 +129,54 @@ class RegisterForm(Form):
     confirm = PasswordField('Confirm Password')
 
 @app.route('/register', methods=['GET', 'POST'])
+@is_logged_in
 def register():
     form = RegisterForm(request.form)
-    if request.method == 'POST' and form.validate():
-        ddb = boto3.client('dynamodb')
-        email = form.email.data
-        password = sha256_crypt.encrypt(str(form.password.data))
-
-        response = ddb.put_item(
-            Item={
+    ddb = boto3.client('dynamodb')
+    email = form.email.data
+    emailexist = ''
+    try:
+        response = ddb.get_item(
+            Key={
                 'email': {
                     'S': email,
-                },
-                'password': {
-                    'S': password,
-                },
-                'ipcam': {
-                    'L': [],
-                },
-                'ipcamvid': {
-                    'L': [],
-                },
-                'collections': {
-                    'L': [],
                 },
             },
             TableName='users',
         )
-        flash('You are now registered and can log in', 'success')
+        emailexist = response['Item']['email']['S']
+    except:
+        emailexist = ''
 
-        return redirect(url_for('login'))
+    if request.method == 'POST' and form.validate():
+        if emailexist != '':
+            flash('email address already registered', 'danger')
+            return redirect(url_for('register'))
+        else:
+            password = sha256_crypt.encrypt(str(form.password.data))
+
+            response = ddb.put_item(
+                Item={
+                    'email': {
+                        'S': email,
+                    },
+                    'password': {
+                        'S': password,
+                    },
+                    'ipcam': {
+                        'L': [],
+                    },
+                    'ipcamvid': {
+                        'L': [],
+                    },
+                    'collections': {
+                        'L': [],
+                    },
+                },
+                TableName='users',
+            )
+            flash('You are now registered and can log in', 'success')
+            return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
 
