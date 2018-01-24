@@ -121,6 +121,12 @@ def lambda_handler(event, context):
                 Message='A face was detected:' + str(public_url),
                 Subject='rekon alert',
             )
+        else:
+            s3con.delete_object(
+                Bucket=bucket,
+                Key=key
+            )
+
 
     except Exception as e:
         print(e)

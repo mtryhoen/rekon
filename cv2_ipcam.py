@@ -73,7 +73,7 @@ if master == 'y':
             proc = subprocess.Popen(['python3', 'cv2_ipcam.py', url, collection, username])
             proclist.append(proc)
         # wait before checking DB again
-        time.sleep(30)
+        time.sleep(300)
         for p in proclist:
             p.terminate()
 else:

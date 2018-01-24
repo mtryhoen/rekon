@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, flash, redirect, url_for, session, logging
 import boto3
 import datetime
+import sys
 from wtforms import Form, StringField, PasswordField, validators, SelectField
 from passlib.hash import sha256_crypt
 from functools import wraps
@@ -44,8 +45,27 @@ def collections():
     form = RegisterCollection(request.form)
     ddb = boto3.client('dynamodb')
     email = session['username']
-    if request.method == 'POST' and form.validate():
+    try:
+        response = ddb.get_item(
+            Key={
+                'email': {
+                    'S': email,
+                },
+            },
+            TableName='users',
+        )
+
+        collections = response['Item']['collections']['L']
+
+    except:
+        collections = []
+
+    if request.method == 'POST' and request.form['btn'] == 'create' and form.validate():
         collection = form.collection.data
+        for collectionexist in collections:
+            if collection == collectionexist['S']:
+                flash('Collection already defined', 'danger')
+                return redirect(url_for('collections'))
         try:
             response = ddb.update_item(
                 UpdateExpression="SET collections = list_append(collections, :col)",
@@ -68,22 +88,29 @@ def collections():
             flash('Could not create new collection', 'danger')
             return redirect(url_for('collections'))
 
+    elif request.method == 'POST':
+        collectiondelete = request.form['btn']
+        i = 0
+        for collection in collections:
+            if collectiondelete == collection['S']:
+                try:
+                    response = ddb.update_item(
+                        UpdateExpression="REMOVE collections[%(collection)d]" % {'collection': i},
+                        Key={
+                            'email': {
+                                'S': email,
+                            },
+                        },
+                        TableName='users',
+                    )
+                    return redirect(url_for('collections'))
+                except:
+                    flash('Could not delete collection', 'danger')
+                    return redirect(url_for('collections'))
+            i = i+1
+        return render_template('collections.html', form=form, collections=collections)
+
     else:
-        try:
-            response = ddb.get_item(
-                Key={
-                    'email': {
-                        'S': email,
-                    },
-                },
-                TableName='users',
-            )
-
-            collections = response['Item']['collections']['L']
-
-        except:
-            collections = []
-
         return render_template('collections.html', form=form, collections=collections)
 
 
@@ -191,42 +218,12 @@ def registeripcam():
     ddb = boto3.client('dynamodb')
     email = session['username']
     if request.method == 'POST':
-        ipcam = form.ipcam.data
-        ipcamvid = form.ipcamvid.data
-        collection = form.collection.data
+        if request.form['btn'] == 'register':
+            ipcam = form.ipcam.data
+            ipcamvid = form.ipcamvid.data
+            collection = form.collection.data
 
-        response = ddb.get_item(
-            Key={
-                'email': {
-                    'S': email,
-                },
-            },
-            TableName='users',
-        )
-
-        ipcamlist = response['Item']['ipcam']['L']
-
-        for ipcamexist in ipcamlist:
-            if ipcam == ipcamexist['M']['Ipcam']['S']:
-                flash('IP camera already defined', 'danger')
-                return redirect(url_for('registeripcam'))
-
-        try:
-            response = ddb.update_item(
-                UpdateExpression="SET ipcam = list_append(ipcam, :cam), ipcamvid = list_append(ipcamvid, :camvid)",
-                ExpressionAttributeValues={
-                    ':cam': {
-                        "L": [
-                            #{"S": ipcam}
-                            {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collection}}}
-                        ]
-                    },
-                    ':camvid': {
-                        "L": [
-                            {"S": ipcamvid}
-                        ]
-                    },
-                },
+            response = ddb.get_item(
                 Key={
                     'email': {
                         'S': email,
@@ -234,10 +231,74 @@ def registeripcam():
                 },
                 TableName='users',
             )
-            return redirect(url_for('registeripcam'))
-        except:
-            flash('Could add the IP camera', 'danger')
-            return redirect(url_for('registeripcam'))
+
+            ipcamlist = response['Item']['ipcam']['L']
+
+            for ipcamexist in ipcamlist:
+                if ipcam == ipcamexist['M']['Ipcam']['S']:
+                    flash('IP camera already defined', 'danger')
+                    return redirect(url_for('registeripcam'))
+
+            try:
+                response = ddb.update_item(
+                    UpdateExpression="SET ipcam = list_append(ipcam, :cam), ipcamvid = list_append(ipcamvid, :camvid)",
+                    ExpressionAttributeValues={
+                        ':cam': {
+                            "L": [
+                                #{"S": ipcam}
+                                {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collection}}}
+                            ]
+                        },
+                        ':camvid': {
+                            "L": [
+                                {"S": ipcamvid}
+                            ]
+                        },
+                    },
+                    Key={
+                        'email': {
+                            'S': email,
+                        },
+                    },
+                    TableName='users',
+                )
+                return redirect(url_for('registeripcam'))
+            except:
+                flash('Could not add the IP camera', 'danger')
+                return redirect(url_for('registeripcam'))
+
+        else:
+            ipcamvid = request.form['btn']
+
+            response = ddb.get_item(
+                Key={
+                    'email': {
+                        'S': email,
+                    },
+                },
+                TableName='users',
+            )
+
+            ipcamlist = response['Item']['ipcamvid']['L']
+            i = 0
+            for ipcamexist in ipcamlist:
+                if ipcamvid == ipcamexist['S']:
+                    try:
+                        response = ddb.update_item(
+                            UpdateExpression='REMOVE ipcam[%(ipcam)d], ipcamvid[%(ipcamvid)d]' % {'ipcam': i, 'ipcamvid': i},
+                            Key={
+                                'email': {
+                                    'S': email,
+                                },
+                            },
+                            TableName='users',
+                        )
+                        return redirect(url_for('registeripcam'))
+                    except:
+                        flash('Could not delete the IP camera', 'danger')
+                        return redirect(url_for('registeripcam'))
+
+                i = i+1
 
     else:
         try:
