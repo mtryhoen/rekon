@@ -121,7 +121,11 @@ else:
                             {
                                 'Key': 'collection',
                                 'Value': str(collectionToUse)
-                            }
+                            },
+                            {
+                                'Key': 'ipcam',
+                                'Value': str(url)
+                            },
                         ]
                     }
                 )

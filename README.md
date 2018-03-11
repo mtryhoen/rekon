@@ -9,6 +9,7 @@ Install
  - sudo apt-get install python3-opencv
  - sudo apt install awscli
  - aws configure
+ - pip install flask, WTForms
 
  Clone the repo:
   - git clone https://github.com/mtryhoen/rekon

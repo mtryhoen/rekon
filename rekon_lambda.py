@@ -22,10 +22,21 @@ def tag_image(bucket, key, index, faceid, similarity):
                 {
                     'Key': str(index) + '-' + str(similarity),
                     'Value': str(faceid)
-                },
+                }
             ]
         }
     )
+
+def get_ipcam(bucket, key):
+    # get object tags
+    response = s3con.get_object_tagging(
+        Bucket=bucket,
+        Key=key
+    )
+    Tags = response['TagSet']
+    for tag in Tags:
+        if tag['Key'] == 'ipcam':
+            return tag['Value']
 
 def get_image(bucket, key):
     # download image locally
@@ -88,13 +99,13 @@ def detect_faces(bucket, key):
 
         if len(response['FaceMatches']) > 0:
             # Return results
-            i = 1
-            for match in response['FaceMatches']:
-                print(match['Face']['ExternalImageId'])
-                print(match['Similarity'])
-                tag_image(bucket, key, i, match['Face']['ExternalImageId'], match['Similarity'])
-                i = i+1
-            return 0
+            # i = 1
+            # for match in response['FaceMatches']:
+            #     print(match['Face']['ExternalImageId'])
+            #     print(match['Similarity'])
+            #     tag_image(bucket, key, i, match['Face']['ExternalImageId'], match['Similarity'])
+            #     i = i+1
+            return 0, collection
         else:
             print('no face detected')
             return 1
@@ -106,13 +117,13 @@ def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
     # key = urllib.unquote_plus(event['Records'][0]['s3']['object']['key'].encode('utf8'))
     key = event['Records'][0]['s3']['object']['key']
-
+    ipcam = get_ipcam(bucket, key)
     try:
 
         # Calls Amazon Rekognition IndexFaces API to detect faces in S3 object
         # to index faces into specified collection
 
-        detection = detect_faces(bucket, key)
+        detection, collectionName = detect_faces(bucket, key)
         if detection == 0:
             public_url = get_public_url(bucket, key)
             snscon = boto3.client('sns')
@@ -120,6 +131,26 @@ def lambda_handler(event, context):
                 TopicArn='arn:aws:sns:eu-west-1:019179343942:rekon',
                 Message='A face was detected:' + str(public_url),
                 Subject='rekon alert',
+            )
+            ddb = boto3.client('dynamodb')
+            prefix, id = key.split('/')
+            email = prefix.replace('-', '@')
+            response = ddb.update_item(
+                UpdateExpression="SET ipcam = :cam",
+                ExpressionAttributeValues={
+                    ':cam': {
+                        "L": [
+                            {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collectionName},
+                                   "Detection": {"S": str(public_url)}}}
+                        ]
+                    }
+                },
+                Key={
+                    'email': {
+                        'S': email,
+                    },
+                },
+                TableName='users',
             )
         else:
             s3con.delete_object(

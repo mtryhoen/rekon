@@ -263,8 +263,7 @@ def registeripcam():
                     ExpressionAttributeValues={
                         ':cam': {
                             "L": [
-                                #{"S": ipcam}
-                                {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collection}}}
+                                {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collection}, "Detection": {"S": 'false'}}}
                             ]
                         },
                         ':camvid': {
@@ -285,9 +284,51 @@ def registeripcam():
                 flash('Could not add the IP camera', 'danger')
                 return redirect(url_for('registeripcam'))
 
+        elif 'rekon-fbpics' in request.form['btn']:
+            image = request.form['btn']
+            response = ddb.get_item(
+                Key={
+                    'email': {
+                        'S': email,
+                    },
+                },
+                TableName='users',
+            )
+
+            ipcamlist = response['Item']['ipcam']['L']
+            i = 0
+            for ipcamexist in ipcamlist:
+                if image == ipcamexist['M']['Detection']['S']:
+                    ipcam = ipcamexist['M']['Ipcam']['S']
+                    collectionName = ipcamexist['M']['Collection']['S']
+                    print(ipcam + '-' + collectionName)
+                    try:
+                        response = ddb.update_item(
+                            UpdateExpression="SET ipcam = :cam",
+                            ExpressionAttributeValues={
+                                ':cam': {
+                                    "L": [
+                                        {"M": {"Ipcam": {"S": ipcam}, "Collection": {"S": collectionName},
+                                               "Detection": {"S": 'false'}}}
+                                    ]
+                                }
+                            },
+                            Key={
+                                'email': {
+                                    'S': email,
+                                },
+                            },
+                            TableName='users',
+                        )
+                        return redirect(url_for('registeripcam'))
+                    except Exception as e:
+                        print(e)
+                        flash('Could not acknowledge image', 'danger')
+                        return redirect(url_for('registeripcam'))
+
+                i = i + 1
         else:
             ipcamvid = request.form['btn']
-
             response = ddb.get_item(
                 Key={
                     'email': {
@@ -303,7 +344,8 @@ def registeripcam():
                 if ipcamvid == ipcamexist['S']:
                     try:
                         response = ddb.update_item(
-                            UpdateExpression='REMOVE ipcam[%(ipcam)d], ipcamvid[%(ipcamvid)d]' % {'ipcam': i, 'ipcamvid': i},
+                            UpdateExpression='REMOVE ipcam[%(ipcam)d], ipcamvid[%(ipcamvid)d]' % {'ipcam': i,
+                                                                                                  'ipcamvid': i},
                             Key={
                                 'email': {
                                     'S': email,
@@ -316,8 +358,7 @@ def registeripcam():
                         flash('Could not delete the IP camera', 'danger')
                         return redirect(url_for('registeripcam'))
 
-                i = i+1
-
+                i = i + 1
     else:
         try:
             response = ddb.get_item(
