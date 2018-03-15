@@ -6,7 +6,9 @@ from wtforms import Form, StringField, PasswordField, validators, SelectField
 from passlib.hash import sha256_crypt
 from functools import wraps
 
-app = Flask(__name__)
+application = Flask(__name__)
+app = application
+app.secret_key='TheSecretKey!'
 
 # Check if user logged in
 def is_logged_in(f):
@@ -380,6 +382,6 @@ def registeripcam():
 
         return render_template('registeripcam.html', ipcam2lists=zip(ipcamlist, ipcamvidlist), camcollections=collections)
 
+
 if __name__ == '__main__':
-    app.secret_key='TheSecretKey!'
     app.run(host='0.0.0.0', debug=True)
