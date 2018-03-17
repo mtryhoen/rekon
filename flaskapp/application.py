@@ -45,7 +45,7 @@ class RegisterCollection(Form):
 @is_logged_in
 def collections():
     form = RegisterCollection(request.form)
-    ddb = boto3.client('dynamodb')
+    ddb = boto3.client('dynamodb', region_name='eu-west-1')
     email = session['username']
     try:
         response = ddb.get_item(
@@ -134,7 +134,7 @@ class RegisterForm(Form):
 @is_logged_in
 def register():
     form = RegisterForm(request.form)
-    ddb = boto3.client('dynamodb')
+    ddb = boto3.client('dynamodb', region_name='eu-west-1')
     email = form.email.data
     emailexist = ''
     try:
@@ -189,7 +189,7 @@ def login():
         # get form fields
         email = request.form['email']
         password_candidate = request.form['password']
-        ddb = boto3.client('dynamodb')
+        ddb = boto3.client('dynamodb', region_name='eu-west-1')
         try:
             response = ddb.get_item(
                 Key={
@@ -235,7 +235,7 @@ class RegisterIpcam(Form):
 @is_logged_in
 def registeripcam():
     form = RegisterIpcam(request.form)
-    ddb = boto3.client('dynamodb')
+    ddb = boto3.client('dynamodb', region_name='eu-west-1')
     email = session['username']
     if request.method == 'POST':
         if request.form['btn'] == 'register':
