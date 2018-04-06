@@ -1,5 +1,5 @@
 import boto3
-import io
+import io, time
 from PIL import Image
 
 rekognition = boto3.client('rekognition', region_name='eu-west-1')
@@ -117,6 +117,8 @@ def lambda_handler(event, context):
     bucket = event['Records'][0]['s3']['bucket']['name']
     # key = urllib.unquote_plus(event['Records'][0]['s3']['object']['key'].encode('utf8'))
     key = event['Records'][0]['s3']['object']['key']
+    print(key)
+    time.sleep(1)
     ipcam = get_ipcam(bucket, key)
     try:
 
@@ -160,6 +162,10 @@ def lambda_handler(event, context):
 
 
     except Exception as e:
+        s3con.delete_object(
+            Bucket=bucket,
+            Key=key
+        )
         print(e)
         print("Error processing object {} from bucket {}. ".format(key, bucket))
         raise e

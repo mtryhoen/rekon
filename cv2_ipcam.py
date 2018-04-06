@@ -43,7 +43,12 @@ def url_to_image(url):
     return respbytes
 
 def get_ipcam():
-    ddb = boto3.client('dynamodb')
+    ddb = boto3.client(
+        'dynamodb',
+        aws_access_key_id='AKIAIOMCEUEAQJ54WMOQ',
+        aws_secret_access_key='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',
+        region_name='eu-west-1'
+    )
     try:
         response = ddb.get_item(
             Key={
@@ -54,7 +59,7 @@ def get_ipcam():
             TableName='users',
         )
         ipcamlist = response['Item']['ipcam']['L']
-        print(ipcamlist)
+        print(ipcamlist, file=open("/var/log/output.txt", "a"))
         return ipcamlist
     except:
         return 0
@@ -78,7 +83,7 @@ if master == 'y':
             p.terminate()
 else:
     while True:
-        time.sleep(1)
+        time.sleep(5)
         # get time
         t = datetime.datetime.now()
         today = datetime.date.today()
@@ -101,10 +106,17 @@ else:
             )
 
             if type(faces) is tuple:
-                print('Y a personne')
+                print('Y a personne', file=open("/var/log/output.txt", "a"))
+                #print('Y a personne')
             elif faces.size:
-                print('Y a qqu')
-                s3con = boto3.client('s3')
+                print('Y a qqu ', file=open("/var/log/output.txt", "a"))
+                #print('Y a qqu ')
+                s3con = boto3.client(
+                    's3',
+                    aws_access_key_id = 'AKIAIOMCEUEAQJ54WMOQ',
+                    aws_secret_access_key = '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',
+                    region_name = 'eu-west-1'
+                )
 
                 response = s3con.put_object(
                     ACL='public-read',
