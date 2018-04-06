@@ -46,7 +46,7 @@ sudo docker build -t "cv2_ipcam:v0.1" .
 sudo docker network create --subnet=192.168.0.32/30 dockernet
 
 # start container using docker network
-sudo docker run -d --net dockernet --ip 192.168.0.34 cv2_ipcam:v0.1
+sudo docker run -d -e AWS_ACCESS_KEY_ID='' -e AWS_SECRET_ACCESS_KEY=''--net dockernet --ip 192.168.0.34 cv2_ipcam:v0.1
 
 #connect to container
 sudo docker exec -it 0b99459ceae0 bash

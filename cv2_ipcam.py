@@ -6,6 +6,10 @@ import datetime
 import time
 import sys
 import subprocess
+import os
+
+secretkey=os.environ.get('AWS_SECRET_ACCESS_KEY')
+accesskey=os.environ.get('AWS_ACCESS_KEY_ID')
 
 collectionToUse = ''
 usernameToUse = ''
@@ -45,8 +49,8 @@ def url_to_image(url):
 def get_ipcam():
     ddb = boto3.client(
         'dynamodb',
-        aws_access_key_id='AKIAIOMCEUEAQJ54WMOQ',
-        aws_secret_access_key='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',
+        aws_access_key_id=accesskey,
+        aws_secret_access_key=secretkey,
         region_name='eu-west-1'
     )
     try:
@@ -113,8 +117,8 @@ else:
                 #print('Y a qqu ')
                 s3con = boto3.client(
                     's3',
-                    aws_access_key_id = 'AKIAIOMCEUEAQJ54WMOQ',
-                    aws_secret_access_key = '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',
+                    aws_access_key_id = accesskey,
+                    aws_secret_access_key = secretkey,
                     region_name = 'eu-west-1'
                 )
 
