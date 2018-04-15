@@ -40,7 +40,7 @@
     }
 
     function viewAlbum() {
-      var albumName = '{{ session.username}}'
+      var albumName = '{{ session.username }}'
       albumName = albumName.replace('@', '-') + '/' + collection
       var albumPhotosKey = albumName + '/';  //encodeURIComponent(albumName) + '/';
       s3.listObjects({Prefix: albumPhotosKey}, function(err, data) {
@@ -95,7 +95,7 @@
         }
         var file = files[0];
         var fileName = file.name;
-        var user = '{{ session.username}}'
+        var user = '{{ session.username }}'
         user = user.replace('@', '-')
 
         var keyName = user + '/' + collection + '/' + fileName;
