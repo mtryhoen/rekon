@@ -45,7 +45,7 @@ Pillow==4.1.1
 pyasn1==0.1.9
 pycrypto==2.6.1
 pycups==1.9.73
-Pygments==2.2.0
+Pygments==2.7.4
 pygobject==3.24.1
 python-apt==1.4.0b3
 python-dateutil==2.6.1
