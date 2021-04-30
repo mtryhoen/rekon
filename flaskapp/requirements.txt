@@ -22,7 +22,7 @@ python-dateutil==2.6.1
 python-debian==0.1.30
 requests==2.18.1
 roman==2.0.0
-rsa==3.4.2
+rsa==4.7
 s3transfer==0.1.11
 SecretStorage==2.3.1
 simplejson==3.11.1
